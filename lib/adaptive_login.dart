@@ -71,11 +71,17 @@ class _GoogleSignInLoginState extends State<_GoogleSignInLogin> {
     );
     _googleSignIn.onCurrentUserChanged.listen((account) {
       if (account != null) {
+        print('🔑 Usuario autenticado: ${account.email}');
         _googleSignIn.authenticatedClient().then((authClient) {
           if (authClient != null) {
+            print('✅ Cliente autenticado obtenido');
             context.read<AuthedUserPlaylists>().authClient = authClient;
             context.go('/');
+          } else {
+            print('❌ No se pudo obtener el cliente autenticado');
           }
+        }).catchError((error) {
+          print('❌ Error obteniendo cliente autenticado: $error');
         });
       }
     });

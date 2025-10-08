@@ -16,18 +16,35 @@ class AuthedUserPlaylists extends ChangeNotifier {
     String? nextPageToken;
     _playlists.clear();
 
-    do {
-      final response = await _api!.playlists.list(
-        ['snippet', 'contentDetails', 'id'],
-        mine: true,
-        maxResults: 50,
-        pageToken: nextPageToken,
-      );
-      _playlists.addAll(response.items!);
-      _playlists.sort((a, b) =>
-          a.snippet!.title!.toLowerCase().compareTo(b.snippet!.title!.toLowerCase()));
-      notifyListeners();
-    } while (nextPageToken != null);
+    try {
+      print('🔍 Cargando playlists de YouTube...');
+      
+      do {
+        final response = await _api!.playlists.list(
+          ['snippet', 'contentDetails', 'id'],
+          mine: true,
+          maxResults: 50,
+          pageToken: nextPageToken,
+        );
+        
+        print('📊 Respuesta de API: ${response.items?.length ?? 0} playlists encontradas');
+        
+        if (response.items != null) {
+          _playlists.addAll(response.items!);
+          _playlists.sort((a, b) =>
+              a.snippet!.title!.toLowerCase().compareTo(b.snippet!.title!.toLowerCase()));
+        }
+        
+        notifyListeners();
+        nextPageToken = response.nextPageToken;
+      } while (nextPageToken != null);
+      
+      print('✅ Playlists cargadas exitosamente: ${_playlists.length} total');
+      
+    } catch (e) {
+      print('❌ Error cargando playlists: $e');
+      rethrow;
+    }
   }
 
   YouTubeApi? _api;
